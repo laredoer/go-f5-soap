@@ -8,6 +8,17 @@ import (
 
 const tns = "urn:iControl:GlobalLB/PoolV2"
 
+type GTMQueryType string
+
+const (
+	GTM_QUERY_TYPE_UNKNOWN GTMQueryType = "GTM_QUERY_TYPE_UNKNOWN"
+	GTM_QUERY_TYPE_A       GTMQueryType = "GTM_QUERY_TYPE_A"
+	GTM_QUERY_TYPE_CNAME   GTMQueryType = "GTM_QUERY_TYPE_CNAME"
+	GTM_QUERY_TYPE_AAAA    GTMQueryType = "GTM_QUERY_TYPE_AAAA"
+	GTM_QUERY_TYPE_SRV     GTMQueryType = "GTM_QUERY_TYPE_SRV"
+	GTM_QUERY_TYPE_NAPTR   GTMQueryType = "GTM_QUERY_TYPE_NAPTR"
+)
+
 type PoolV2 struct {
 	c *go_f5_soap.Client
 }
@@ -60,7 +71,7 @@ type Member struct {
 	Server string
 }
 
-func (p *PoolV2) GetMember(pools []PoolID) ([]Member, error) {
+func (p *PoolV2) GetMember(pools []PoolID) ([][]Member, error) {
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
@@ -82,14 +93,87 @@ func (p *PoolV2) GetMember(pools []PoolID) ([]Member, error) {
 		return nil, err
 	}
 
-	var res []Member
+	var res [][]Member
 	for _, v := range resp.Body.GetMemberResponse.Return.Item {
+		var poolMembers []Member
 		for _, v2 := range v.Item {
-			res = append(res, Member{
+			poolMembers = append(poolMembers, Member{
 				Name:   v2.Name.Text,
 				Server: v2.Server.Text,
 			})
 		}
+		res = append(res, poolMembers)
+	}
+
+	return res, nil
+}
+
+type GetListByTypeBody struct {
+	GetListByType GetListByType `xml:"tns:get_list_by_type"`
+}
+
+type GetListByType struct {
+	Types Types `xml:"types"`
+}
+
+type Types struct {
+	Item []GTMQueryType `xml:"item"`
+}
+
+type ListByTypeResp struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Body    struct {
+		GetListByTypeResponse struct {
+			Return struct {
+				Item []struct {
+					Item []struct {
+						PoolName struct {
+							Text string `xml:",chardata" `
+						} `xml:"pool_name" `
+						PoolType struct {
+							Text string `xml:",chardata" `
+						} `xml:"pool_type" `
+					} `xml:"item" `
+				} `xml:"item" `
+			} `xml:"return"`
+		} `xml:"get_list_by_typeResponse"`
+	} `xml:"Body" `
+}
+
+func (p *PoolV2) GetListByType(gtmQueryType []GTMQueryType) ([][]PoolID, error) {
+
+	type req struct {
+		go_f5_soap.BaseEnvEnvelope
+		Body GetListByTypeBody `xml:"env:Body"`
+	}
+
+	bt, err := p.c.Call(context.Background(), req{
+		BaseEnvEnvelope: go_f5_soap.NewBaseEnvEnvelope(tns),
+		Body: GetListByTypeBody{GetListByType: GetListByType{
+			Types: Types{
+				Item: gtmQueryType,
+			},
+		}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ListByTypeResp
+	if err := xml.Unmarshal(bt, &resp); err != nil {
+		return nil, err
+	}
+
+	var res [][]PoolID
+	for _, v := range resp.Body.GetListByTypeResponse.Return.Item {
+		var poolIDArr []PoolID
+		for _, v2 := range v.Item {
+			poolIDArr = append(poolIDArr, PoolID{
+				PoolName: v2.PoolName.Text,
+				PoolType: v2.PoolType.Text,
+			})
+		}
+		res = append(res, poolIDArr)
 	}
 
 	return res, nil
