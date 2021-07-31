@@ -3,12 +3,12 @@ package go_f5_soap
 import "encoding/xml"
 
 type BaseEnvEnvelope struct {
-	XMLName xml.Name `xml:"env:Envelope" json:"envelope,omitempty"`
-	Xsd     string   `xml:"xmlns:xsd,attr" json:"xsd,omitempty"`
-	Xsi     string   `xml:"xmlns:xsi,attr" json:"xsi,omitempty"`
-	Tns     string   `xml:"xmlns:tns,attr" json:"tns,omitempty"`
-	Env     string   `xml:"xmlns:env,attr" json:"env,omitempty"`
-	Ins0    string   `xml:"xmlns:ins0,attr" json:"ins0,omitempty"`
+	XMLName xml.Name `xml:"env:Envelope"`
+	Xsd     string   `xml:"xmlns:xsd,attr"`
+	Xsi     string   `xml:"xmlns:xsi,attr"`
+	Tns     string   `xml:"xmlns:tns,attr"`
+	Env     string   `xml:"xmlns:env,attr"`
+	Ins0    string   `xml:"xmlns:ins0,attr"`
 }
 
 func NewBaseEnvEnvelope(tns string) BaseEnvEnvelope {

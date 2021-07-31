@@ -9,11 +9,11 @@ import (
 const tns = "urn:iControl:GlobalLB/Pool"
 
 type GetAlternateLbMethodBody struct {
-	GetAlternateLbMethod GetAlternateLbMethod `xml:"tns:get_alternate_lb_method" json:"get_alternate_lb_method,omitempty"`
+	GetAlternateLbMethod GetAlternateLbMethod `xml:"tns:get_alternate_lb_method"`
 }
 
 type GetAlternateLbMethod struct {
-	PoolNames PoolNames `xml:"pool_names" json:"pool_names,omitempty"`
+	PoolNames PoolNames `xml:"pool_names"`
 }
 
 type PoolNames struct {
@@ -31,14 +31,14 @@ func NewPool(c *go_f5_soap.Client) *Pool {
 }
 
 type AlternateLbMethodByPoolNamesResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetAlternateLbMethodResponse struct {
 			Return struct {
 				Item []string `xml:"item"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_alternate_lb_methodResponse" json:"get_alternate_lb_methodresponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+			} `xml:"return"`
+		} `xml:"get_alternate_lb_methodResponse"`
+	} `xml:"Body"`
 }
 
 func (p *Pool) GetAlternateLBMethod(poolName string) (string, error) {
@@ -58,7 +58,7 @@ func (p *Pool) GetAlternateLBMethodByPoolNames(poolNames []string) ([]string, er
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
-		Body GetAlternateLbMethodBody `xml:"env:Body" json:"body,omitempty"`
+		Body GetAlternateLbMethodBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
@@ -79,22 +79,22 @@ func (p *Pool) GetAlternateLBMethodByPoolNames(poolNames []string) ([]string, er
 }
 
 type GetPreferredLBMethodBody struct {
-	GetPreferredLBMethod GetPreferredLBMethod `xml:"tns:get_preferred_lb_method" json:"get_preferred_lb_method,omitempty"`
+	GetPreferredLBMethod GetPreferredLBMethod `xml:"tns:get_preferred_lb_method"`
 }
 
 type GetPreferredLBMethod struct {
-	PoolNames PoolNames `xml:"pool_names" json:"pool_names,omitempty"`
+	PoolNames PoolNames `xml:"pool_names"`
 }
 
 type PreferredLBMethodByPoolNamesResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetPreferredLbMethodResponse struct {
 			Return struct {
 				Item []string `xml:"item"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_preferred_lb_methodResponse" json:"get_preferred_lb_methodresponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+			} `xml:"return"`
+		} `xml:"get_preferred_lb_methodResponse"`
+	} `xml:"Body"`
 }
 
 func (p *Pool) GetPreferredLBMethod(poolName string) (string, error) {
@@ -113,7 +113,7 @@ func (p *Pool) GetPreferredLBMethodByPoolNames(poolNames []string) ([]string, er
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
-		Body GetPreferredLBMethodBody `xml:"env:Body" json:"body,omitempty"`
+		Body GetPreferredLBMethodBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
@@ -134,22 +134,22 @@ func (p *Pool) GetPreferredLBMethodByPoolNames(poolNames []string) ([]string, er
 }
 
 type GetTTLBody struct {
-	GetTTL GetTTL `xml:"tns:get_ttl" json:"get_ttl,omitempty"`
+	GetTTL GetTTL `xml:"tns:get_ttl"`
 }
 
 type GetTTL struct {
-	PoolNames PoolNames `xml:"pool_names" json:"pool_names,omitempty"`
+	PoolNames PoolNames `xml:"pool_names"`
 }
 
 type TTLResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetTtlResponse struct {
 			Return struct {
 				Item []int64 `xml:"item"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_ttlResponse" json:"get_ttlresponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+			} `xml:"return"`
+		} `xml:"get_ttlResponse"`
+	} `xml:"Body"`
 }
 
 func (p *Pool) GetTTL(poolName string) (int64, error) {
@@ -170,7 +170,7 @@ func (p *Pool) GetTTLByPoolNames(poolNames []string) ([]int64, error) {
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
-		Body GetTTLBody `xml:"env:Body" json:"body,omitempty"`
+		Body GetTTLBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
@@ -190,22 +190,22 @@ func (p *Pool) GetTTLByPoolNames(poolNames []string) ([]int64, error) {
 }
 
 type GetVerifyMemberAvailabilityStateBody struct {
-	GetVerifyMemberAvailabilityState GetVerifyMemberAvailabilityState `xml:"tns:get_verify_member_availability_state" json:"get_ttl,omitempty"`
+	GetVerifyMemberAvailabilityState GetVerifyMemberAvailabilityState `xml:"tns:get_verify_member_availability_state"`
 }
 
 type GetVerifyMemberAvailabilityState struct {
-	PoolNames PoolNames `xml:"pool_names" json:"pool_names,omitempty"`
+	PoolNames PoolNames `xml:"pool_names"`
 }
 
 type VerifyMemberAvailabilityStateResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetVerifyMemberAvailabilityStateResponse struct {
 			Return struct {
 				Item []string `xml:"item"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_verify_member_availability_stateResponse" json:"get_verify_member_availability_stateresponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+			} `xml:"return"`
+		} `xml:"get_verify_member_availability_stateResponse"`
+	} `xml:"Body"`
 }
 
 func (p *Pool) GetVerifyMemberAvailabilityState(poolName string) (string, error) {
@@ -226,7 +226,7 @@ func (p *Pool) GetVerifyMemberAvailabilityStateByPoolNames(poolNames []string) (
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
-		Body GetVerifyMemberAvailabilityStateBody `xml:"env:Body" json:"body,omitempty"`
+		Body GetVerifyMemberAvailabilityStateBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
@@ -246,22 +246,22 @@ func (p *Pool) GetVerifyMemberAvailabilityStateByPoolNames(poolNames []string) (
 }
 
 type GetAnswersToReturnBody struct {
-	GetAnswersToReturn GetAnswersToReturn `xml:"tns:get_answers_to_return" json:"get_answers_to_return,omitempty"`
+	GetAnswersToReturn GetAnswersToReturn `xml:"tns:get_answers_to_return"`
 }
 
 type GetAnswersToReturn struct {
-	PoolNames PoolNames `xml:"pool_names" json:"pool_names,omitempty"`
+	PoolNames PoolNames `xml:"pool_names"`
 }
 
 type AnswersToReturnResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetAnswersToReturnResponse struct {
 			Return struct {
 				Item []int64 `xml:"item"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_answers_to_returnResponse" json:"get_answers_to_returnResponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+			} `xml:"return"`
+		} `xml:"get_answers_to_returnResponse"`
+	} `xml:"Body"`
 }
 
 func (p *Pool) GetAnswersToReturn(poolName string) (int64, error) {
@@ -282,7 +282,7 @@ func (p *Pool) GetAnswersToReturnByPoolNames(poolNames []string) ([]int64, error
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
-		Body GetAnswersToReturnBody `xml:"env:Body" json:"body,omitempty"`
+		Body GetAnswersToReturnBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
@@ -302,11 +302,11 @@ func (p *Pool) GetAnswersToReturnByPoolNames(poolNames []string) ([]int64, error
 }
 
 type GetObjectStatusBody struct {
-	GetObjectStatus GetObjectStatus `xml:"tns:get_object_status" json:"get_object_status,omitempty"`
+	GetObjectStatus GetObjectStatus `xml:"tns:get_object_status"`
 }
 
 type GetObjectStatus struct {
-	PoolNames PoolNames `xml:"pool_names" json:"pool_names,omitempty"`
+	PoolNames PoolNames `xml:"pool_names"`
 }
 
 type ObjectStatus struct {
@@ -316,24 +316,24 @@ type ObjectStatus struct {
 }
 
 type ObjectStatusResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetObjectStatusResponse struct {
 			Return struct {
 				Item []struct {
 					AvailabilityStatus struct {
-						Text string `xml:",chardata" json:"text,omitempty"`
-					} `xml:"availability_status" json:"availability_status,omitempty"`
+						Text string `xml:",chardata"`
+					} `xml:"availability_status"`
 					EnabledStatus struct {
-						Text string `xml:",chardata" json:"text,omitempty"`
-					} `xml:"enabled_status" json:"enabled_status,omitempty"`
+						Text string `xml:",chardata"`
+					} `xml:"enabled_status"`
 					StatusDescription struct {
-						Text string `xml:",chardata" json:"text,omitempty"`
-					} `xml:"status_description" json:"status_description,omitempty"`
-				} `xml:"item" json:"item,omitempty"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_object_statusResponse" json:"get_object_statusresponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+						Text string `xml:",chardata"`
+					} `xml:"status_description"`
+				} `xml:"item"`
+			} `xml:"return"`
+		} `xml:"get_object_statusResponse"`
+	} `xml:"Body"`
 }
 
 func (p *Pool) GetObjectStatus(poolName string) (ObjectStatus, error) {
@@ -352,7 +352,7 @@ func (p *Pool) GetObjectStatusByPoolNames(poolNames []string) ([]ObjectStatus, e
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
-		Body GetObjectStatusBody `xml:"env:Body" json:"body,omitempty"`
+		Body GetObjectStatusBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
@@ -381,22 +381,22 @@ func (p *Pool) GetObjectStatusByPoolNames(poolNames []string) ([]ObjectStatus, e
 }
 
 type GetEnabledStateBody struct {
-	GetEnabledState GetEnabledState `xml:"tns:get_enabled_state" json:"get_enabled_state,omitempty"`
+	GetEnabledState GetEnabledState `xml:"tns:get_enabled_state"`
 }
 
 type GetEnabledState struct {
-	PoolNames PoolNames `xml:"pool_names" json:"pool_names,omitempty"`
+	PoolNames PoolNames `xml:"pool_names"`
 }
 
 type EnabledStateResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetEnabledStateResponse struct {
 			Return struct {
 				Item []string `xml:"item"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_enabled_stateResponse" json:"get_enabled_stateresponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+			} `xml:"return"`
+		} `xml:"get_enabled_stateResponse"`
+	} `xml:"Body"`
 }
 
 func (p *Pool) GetEnabledState(poolName string) (string, error) {
@@ -416,7 +416,7 @@ func (p *Pool) GetEnabledStateByNames(poolNames []string) ([]string, error) {
 
 	type req struct {
 		go_f5_soap.BaseEnvEnvelope
-		Body GetEnabledStateBody `xml:"env:Body" json:"body,omitempty"`
+		Body GetEnabledStateBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
@@ -434,7 +434,3 @@ func (p *Pool) GetEnabledStateByNames(poolNames []string) ([]string, error) {
 
 	return resp.Body.GetEnabledStateResponse.Return.Item, nil
 }
-
-
-
-

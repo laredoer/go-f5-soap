@@ -47,23 +47,23 @@ type Pools struct {
 }
 
 type MemberResp struct {
-	XMLName xml.Name `xml:"Envelope" json:"envelope,omitempty"`
+	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
 		GetMemberResponse struct {
 			Return struct {
 				Item []struct {
 					Item []struct {
 						Name struct {
-							Text string `xml:",chardata" json:"text,omitempty"`
-						} `xml:"name" json:"name,omitempty"`
+							Text string `xml:",chardata"`
+						} `xml:"name"`
 						Server struct {
-							Text string `xml:",chardata" json:"text,omitempty"`
-						} `xml:"server" json:"server,omitempty"`
-					} `xml:"item" json:"item,omitempty"`
-				} `xml:"item" json:"item,omitempty"`
-			} `xml:"return" json:"return,omitempty"`
-		} `xml:"get_memberResponse" json:"get_memberresponse,omitempty"`
-	} `xml:"Body" json:"body,omitempty"`
+							Text string `xml:",chardata"`
+						} `xml:"server"`
+					} `xml:"item"`
+				} `xml:"item"`
+			} `xml:"return"`
+		} `xml:"get_memberResponse"`
+	} `xml:"Body"`
 }
 
 type Member struct {
