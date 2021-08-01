@@ -11,12 +11,12 @@ const tns = "urn:iControl:GlobalLB/PoolV2"
 type GTMQueryType string
 
 const (
-	GTM_QUERY_TYPE_UNKNOWN GTMQueryType = "GTM_QUERY_TYPE_UNKNOWN"
-	GTM_QUERY_TYPE_A       GTMQueryType = "GTM_QUERY_TYPE_A"
-	GTM_QUERY_TYPE_CNAME   GTMQueryType = "GTM_QUERY_TYPE_CNAME"
-	GTM_QUERY_TYPE_AAAA    GTMQueryType = "GTM_QUERY_TYPE_AAAA"
-	GTM_QUERY_TYPE_SRV     GTMQueryType = "GTM_QUERY_TYPE_SRV"
-	GTM_QUERY_TYPE_NAPTR   GTMQueryType = "GTM_QUERY_TYPE_NAPTR"
+	GtmQueryTypeUnknown GTMQueryType = "GTM_QUERY_TYPE_UNKNOWN"
+	GtmQueryTypeA       GTMQueryType = "GTM_QUERY_TYPE_A"
+	GtmQueryTypeCname   GTMQueryType = "GTM_QUERY_TYPE_CNAME"
+	GtmQueryTypeAAAA    GTMQueryType = "GTM_QUERY_TYPE_AAAA"
+	GtmQueryTypeSrv     GTMQueryType = "GTM_QUERY_TYPE_SRV"
+	GtmQueryTypeNaptr   GTMQueryType = "GTM_QUERY_TYPE_NAPTR"
 )
 
 type PoolV2 struct {
@@ -138,6 +138,63 @@ type ListByTypeResp struct {
 			} `xml:"return"`
 		} `xml:"get_list_by_typeResponse"`
 	} `xml:"Body" `
+}
+
+type GetListBody struct {
+	GetList GetList `xml:"tns:get_list"`
+}
+
+type GetList struct {
+}
+
+type ListResp struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Body    struct {
+		GetListResponse struct {
+			Return struct {
+				Item []struct {
+					PoolName struct {
+						Text string `xml:",chardata" `
+					} `xml:"pool_name" `
+					PoolType struct {
+						Text string `xml:",chardata" `
+					} `xml:"pool_type" `
+				} `xml:"item" `
+			} `xml:"return"`
+		} `xml:"get_listResponse"`
+	} `xml:"Body" `
+}
+
+func (p *PoolV2) GetList() ([]PoolID, error) {
+
+	type req struct {
+		go_f5_soap.BaseEnvEnvelope
+		Body GetListBody `xml:"env:Body"`
+	}
+
+	bt, err := p.c.Call(context.Background(), req{
+		BaseEnvEnvelope: go_f5_soap.NewBaseEnvEnvelope(tns),
+		Body:            GetListBody{GetList: GetList{}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ListResp
+	if err := xml.Unmarshal(bt, &resp); err != nil {
+		return nil, err
+	}
+
+	var res []PoolID
+	for _, v := range resp.Body.GetListResponse.Return.Item {
+		res = append(res, PoolID{
+			PoolName: v.PoolName.Text,
+			PoolType: v.PoolType.Text,
+		})
+	}
+
+	return res, nil
+
 }
 
 func (p *PoolV2) GetListByType(gtmQueryType []GTMQueryType) ([][]PoolID, error) {
