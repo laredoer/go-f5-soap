@@ -3,27 +3,44 @@ package pool_v2
 import (
 	"context"
 	"encoding/xml"
-	go_f5_soap "github.com/wule61/go-f5-soap"
+
+	soap "github.com/wule61/go-f5-soap"
+	"github.com/wule61/go-f5-soap/common"
+	"github.com/wule61/go-f5-soap/global_lb"
 )
 
 const tns = "urn:iControl:GlobalLB/PoolV2"
 
-type GTMQueryType string
-
-const (
-	GtmQueryTypeUnknown GTMQueryType = "GTM_QUERY_TYPE_UNKNOWN"
-	GtmQueryTypeA       GTMQueryType = "GTM_QUERY_TYPE_A"
-	GtmQueryTypeCname   GTMQueryType = "GTM_QUERY_TYPE_CNAME"
-	GtmQueryTypeAAAA    GTMQueryType = "GTM_QUERY_TYPE_AAAA"
-	GtmQueryTypeSrv     GTMQueryType = "GTM_QUERY_TYPE_SRV"
-	GtmQueryTypeNaptr   GTMQueryType = "GTM_QUERY_TYPE_NAPTR"
-)
-
-type PoolV2 struct {
-	c *go_f5_soap.Client
+// The IPoolV2 interface enables you to work with typed pools and their attributes.
+// Typed pools (like A, AAAA, CNAME, MX, SRV, and NAPTR) may contain members of the same type.
+// This allows for greater flexibility and more granular control over the responses that GTM sends.
+// Previously, in the GlobalLB::Pool interface, members were only virtual servers.
+// Now, in the PoolV2 interface, members can be virtual servers (for type A or AAAA type pools)
+// or non-terminal type members (for type CNAME, MX, SRV, or NAPTR type pools).
+// Non-terminal members are specified with a required dname and some optional settings
+// that depend upon the type of non-terminal member.
+// Except in the case of a CNAME member with the static-target setting enabled,
+// all non-terminal members are backed by a corresponding wide IP.
+// The dname of the non-terminal member is non-folderized and must be a fully-qualified domain name.
+// The dname of the non-terminal member must match (exactly or via wide IP wildcard match)
+// the name of a corresponding wide IP (without the folder name),
+// except in the case mentioned above where the non-terminal is a CNAME type member with static-target enabled.
+type IPoolV2 interface {
+	GetMember(pools []PoolID) ([][]Member, error)
+	GetList() ([]PoolID, error)
+	GetListByType(gtmQueryType []global_lb.GTMQueryType) ([][]PoolID, error)
+	GetTTL(pools []PoolID) ([]int64, error)
+	GetEnabledState(pools []PoolID) ([]common.EnabledState, error)
+	GetObjectStatus(pools []PoolID) ([]common.ObjectStatus, error)
 }
 
-func NewPoolV2(c *go_f5_soap.Client) *PoolV2 {
+var _ IPoolV2 = (*PoolV2)(nil)
+
+type PoolV2 struct {
+	c *soap.Client
+}
+
+func New(c *soap.Client) *PoolV2 {
 	return &PoolV2{
 		c: c,
 	}
@@ -74,12 +91,12 @@ type Member struct {
 func (p *PoolV2) GetMember(pools []PoolID) ([][]Member, error) {
 
 	type req struct {
-		go_f5_soap.BaseEnvEnvelope
+		soap.BaseEnvEnvelope
 		Body GetMemberBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
-		BaseEnvEnvelope: go_f5_soap.NewBaseEnvEnvelope(tns),
+		BaseEnvEnvelope: soap.NewBaseEnvEnvelope(tns),
 		Body: GetMemberBody{GetMember: GetMember{Pools: Pools{
 			Item: pools,
 		}}},
@@ -117,7 +134,7 @@ type GetListByType struct {
 }
 
 type Types struct {
-	Item []GTMQueryType `xml:"item"`
+	Item []global_lb.GTMQueryType `xml:"item"`
 }
 
 type ListByTypeResp struct {
@@ -146,7 +163,6 @@ type GetListBody struct {
 
 type GetList struct {
 }
-
 type ListResp struct {
 	XMLName xml.Name `xml:"Envelope"`
 	Body    struct {
@@ -168,12 +184,12 @@ type ListResp struct {
 func (p *PoolV2) GetList() ([]PoolID, error) {
 
 	type req struct {
-		go_f5_soap.BaseEnvEnvelope
+		soap.BaseEnvEnvelope
 		Body GetListBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
-		BaseEnvEnvelope: go_f5_soap.NewBaseEnvEnvelope(tns),
+		BaseEnvEnvelope: soap.NewBaseEnvEnvelope(tns),
 		Body:            GetListBody{GetList: GetList{}},
 	})
 	if err != nil {
@@ -197,15 +213,15 @@ func (p *PoolV2) GetList() ([]PoolID, error) {
 
 }
 
-func (p *PoolV2) GetListByType(gtmQueryType []GTMQueryType) ([][]PoolID, error) {
+func (p *PoolV2) GetListByType(gtmQueryType []global_lb.GTMQueryType) ([][]PoolID, error) {
 
 	type req struct {
-		go_f5_soap.BaseEnvEnvelope
+		soap.BaseEnvEnvelope
 		Body GetListByTypeBody `xml:"env:Body"`
 	}
 
 	bt, err := p.c.Call(context.Background(), req{
-		BaseEnvEnvelope: go_f5_soap.NewBaseEnvEnvelope(tns),
+		BaseEnvEnvelope: soap.NewBaseEnvEnvelope(tns),
 		Body: GetListByTypeBody{GetListByType: GetListByType{
 			Types: Types{
 				Item: gtmQueryType,
@@ -231,6 +247,157 @@ func (p *PoolV2) GetListByType(gtmQueryType []GTMQueryType) ([][]PoolID, error) 
 			})
 		}
 		res = append(res, poolIDArr)
+	}
+
+	return res, nil
+}
+
+type GetTTLBody struct {
+	GetTTL GetTTL `xml:"tns:get_ttl"`
+}
+
+type GetTTL struct {
+	Pools Pools `xml:"pools"`
+}
+
+type TTLResp struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Body    struct {
+		GetTtlResponse struct {
+			Return struct {
+				Item []int64 `xml:"item"`
+			} `xml:"return"`
+		} `xml:"get_ttlResponse"`
+	} `xml:"Body"`
+}
+
+func (p *PoolV2) GetTTL(pools []PoolID) ([]int64, error) {
+
+	type req struct {
+		soap.BaseEnvEnvelope
+		Body GetTTLBody `xml:"env:Body"`
+	}
+
+	bt, err := p.c.Call(context.Background(), req{
+		BaseEnvEnvelope: soap.NewBaseEnvEnvelope(tns),
+		Body: GetTTLBody{GetTTL: GetTTL{
+			Pools: Pools{Item: pools},
+		}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp TTLResp
+	if err := xml.Unmarshal(bt, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Body.GetTtlResponse.Return.Item, nil
+}
+
+type GetEnabledStateBody struct {
+	GetEnabledState GetEnabledState `xml:"tns:get_enabled_state"`
+}
+
+type GetEnabledState struct {
+	Pools Pools `xml:"pools"`
+}
+
+type EnableStateResp struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Body    struct {
+		GetEnabledStateResponse struct {
+			Return struct {
+				Item []common.EnabledState `xml:"item"`
+			} `xml:"return"`
+		} `xml:"get_enabled_stateResponse"`
+	} `xml:"Body"`
+}
+
+func (p *PoolV2) GetEnabledState(pools []PoolID) ([]common.EnabledState, error) {
+
+	type req struct {
+		soap.BaseEnvEnvelope
+		Body GetEnabledStateBody `xml:"env:Body"`
+	}
+
+	bt, err := p.c.Call(context.Background(), req{
+		BaseEnvEnvelope: soap.NewBaseEnvEnvelope(tns),
+		Body: GetEnabledStateBody{GetEnabledState: GetEnabledState{Pools: Pools{
+			Item: pools,
+		}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp EnableStateResp
+	if err := xml.Unmarshal(bt, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Body.GetEnabledStateResponse.Return.Item, nil
+
+}
+
+type GetObjectStatusBody struct {
+	GetObjectStatus GetObjectStatus `xml:"tns:get_object_status"`
+}
+
+type GetObjectStatus struct {
+	Pools Pools `xml:"pools"`
+}
+
+type ObjectStatusResp struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Body    struct {
+		GetObjectStatusResponse struct {
+			Return struct {
+				Item []struct {
+					Text               string `xml:",chardata" `
+					AvailabilityStatus struct {
+						Text common.AvailabilityStatus `xml:",chardata"`
+					} `xml:"availability_status"`
+					EnabledStatus struct {
+						Text common.EnabledStatus `xml:",chardata" `
+					} `xml:"enabled_status" `
+					StatusDescription struct {
+						Text string `xml:",chardata"`
+					} `xml:"status_description"`
+				} `xml:"item"`
+			} `xml:"return"`
+		} `xml:"get_object_statusResponse"`
+	} `xml:"Body"`
+}
+
+func (p *PoolV2) GetObjectStatus(pools []PoolID) ([]common.ObjectStatus, error) {
+
+	type req struct {
+		soap.BaseEnvEnvelope
+		Body GetObjectStatusBody `xml:"env:Body"`
+	}
+
+	bt, err := p.c.Call(context.Background(), req{
+		BaseEnvEnvelope: soap.NewBaseEnvEnvelope(tns),
+		Body:            GetObjectStatusBody{GetObjectStatus: GetObjectStatus{Pools: Pools{Item: pools}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var resp ObjectStatusResp
+	if err := xml.Unmarshal(bt, &resp); err != nil {
+		return nil, err
+	}
+
+	var res []common.ObjectStatus
+	for _, v := range resp.Body.GetObjectStatusResponse.Return.Item {
+		res = append(res, common.ObjectStatus{
+			AvailabilityStatus: v.AvailabilityStatus.Text,
+			EnabledStatus:      v.EnabledStatus.Text,
+			StatusDescription:  v.StatusDescription.Text,
+		})
 	}
 
 	return res, nil

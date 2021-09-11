@@ -1,4 +1,4 @@
-package go_f5_soap
+package soap
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"fmt"
+	"github.com/FishGoddess/logit"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -44,6 +45,12 @@ func WithHTTPHeaders(headers map[string]string) Option {
 	}
 }
 
+func WithDebug() Option {
+	return func(o *options) {
+		o.debug = true
+	}
+}
+
 type options struct {
 	tlsCfg           *tls.Config
 	auth             *basicAuth
@@ -52,6 +59,7 @@ type options struct {
 	conTimeout       time.Duration
 	tlsHShakeTimeout time.Duration
 	httpHeaders      map[string]string
+	debug            bool
 }
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
@@ -111,6 +119,10 @@ func (c *Client) Call(ctx context.Context, request interface{}) (response []byte
 		return nil, err
 	}
 
+	if c.opts.debug {
+		logit.Debug("==== request body ===>>\n", buffer.String())
+	}
+
 	req, err := http.NewRequest("POST", c.url, buffer)
 	if err != nil {
 		return nil, err
@@ -159,6 +171,10 @@ func (c *Client) Call(ctx context.Context, request interface{}) (response []byte
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if c.opts.debug {
+		logit.Debug("==== response body ===>>\n", string(body))
 	}
 
 	return body, nil

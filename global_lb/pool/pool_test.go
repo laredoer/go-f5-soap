@@ -2,23 +2,24 @@ package pool
 
 import (
 	"crypto/tls"
-	go_f5_soap "github.com/wule61/go-f5-soap"
 	"testing"
+
+	soap "github.com/wule61/go-f5-soap"
+	"github.com/wule61/go-f5-soap/global_lb"
 )
 
-func newClient(t *testing.T) *go_f5_soap.Client {
-	return go_f5_soap.NewClient("https://202.173.9.33/iControl/iControlPortal.cgi",
-		go_f5_soap.WithBasicAuth("admin","admin"),
-		go_f5_soap.WithTLS(&tls.Config{InsecureSkipVerify: true}),
+func newClient(t *testing.T) *soap.Client {
+	return soap.NewClient("https://10.2.0.44/iControl/iControlPortal.cgi",
+		soap.WithBasicAuth("admin", "admin"),
+		soap.WithTLS(&tls.Config{InsecureSkipVerify: true}),
 	)
 }
 
-func TestPool_GetAlternateLbMethodByPoolNames(t *testing.T) {
+func TestPool_GetAlternateLbMethod(t *testing.T) {
 
+	p := New(newClient(t))
 
-	p := NewPool(newClient(t))
-
-	arr, err := p.GetAlternateLBMethodByPoolNames([]string{"/Common/pool1","/Common/pool2"})
+	arr, err := p.GetAlternateLBMethod([]string{"/Common/pool1", "/Common/pool2"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,10 +27,10 @@ func TestPool_GetAlternateLbMethodByPoolNames(t *testing.T) {
 	t.Log(arr)
 }
 
-func TestPool_GetAlternateLBMethodByPoolNames(t *testing.T) {
-	p := NewPool(newClient(t))
+func TestPool_GetAlternateLBMethod(t *testing.T) {
+	p := New(newClient(t))
 
-	arr, err := p.GetPreferredLBMethodByPoolNames([]string{"/Common/pool1","/Common/pool2","/Common/aaaa"})
+	arr, err := p.GetPreferredLBMethod([]string{"/Common/pool1", "/Common/pool2", "/Common/aaaa"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,11 +38,11 @@ func TestPool_GetAlternateLBMethodByPoolNames(t *testing.T) {
 	t.Log(arr)
 }
 
-func TestPool_GetTTLByPoolNames(t *testing.T) {
+func TestPool_GetTTL(t *testing.T) {
 
-	p := NewPool(newClient(t))
+	p := New(newClient(t))
 
-	arr, err := p.GetTTLByPoolNames([]string{"/Common/pool1","/Common/pool2","/Common/aaaa"})
+	arr, err := p.GetTTL([]string{"/Common/pool1", "/Common/pool2", "/Common/aaaa"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,10 +50,10 @@ func TestPool_GetTTLByPoolNames(t *testing.T) {
 	t.Log(arr)
 }
 
-func TestPool_GetVerifyMemberAvailabilityStateByPoolNames(t *testing.T) {
-	p := NewPool(newClient(t))
+func TestPool_GetVerifyMemberAvailabilityState(t *testing.T) {
+	p := New(newClient(t))
 
-	arr, err := p.GetVerifyMemberAvailabilityStateByPoolNames([]string{"/Common/pool1","/Common/pool2","/Common/aaaa"})
+	arr, err := p.GetVerifyMemberAvailabilityState([]string{"/Common/pool1", "/Common/pool2", "/Common/aaaa"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,10 +61,10 @@ func TestPool_GetVerifyMemberAvailabilityStateByPoolNames(t *testing.T) {
 	t.Log(arr)
 }
 
-func TestPool_GetAnswersToReturnByPoolNames(t *testing.T) {
-	p := NewPool(newClient(t))
+func TestPool_GetAnswersToReturn(t *testing.T) {
+	p := New(newClient(t))
 
-	arr, err := p.GetAnswersToReturnByPoolNames([]string{"/Common/pool1","/Common/pool2","/Common/aaaa"})
+	arr, err := p.GetAnswersToReturn([]string{"/Common/pool1", "/Common/pool2", "/Common/aaaa"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,25 +72,84 @@ func TestPool_GetAnswersToReturnByPoolNames(t *testing.T) {
 	t.Log(arr)
 }
 
-func TestPool_GetObjectStatusByPoolNames(t *testing.T) {
+func TestPool_GetObjectStatus(t *testing.T) {
 
-	p := NewPool(newClient(t))
+	p := New(newClient(t))
 
-	arr, err := p.GetObjectStatusByPoolNames([]string{"/Common/pool1","/Common/pool2","/Common/aaaa"})
+	arr, err := p.GetObjectStatus([]string{"/Common/pool1", "/Common/pool2", "/Common/aaaa"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Logf("%+v",arr)
+	t.Logf("%+v", arr)
 }
 
-func TestPool_GetEnabledStateByNames(t *testing.T) {
-	p := NewPool(newClient(t))
+func TestPool_GetEnabledState(t *testing.T) {
+	p := New(newClient(t))
 
-	arr, err := p.GetEnabledStateByNames([]string{"/Common/pool1","/Common/pool2","/Common/aaaa"})
+	arr, err := p.GetEnabledState([]string{"/Common/pool1", "/Common/pool2", "/Common/aaaa"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Logf("%+v",arr)
+	t.Logf("%+v", arr)
+}
+
+func TestPool_GetList(t *testing.T) {
+
+	p := New(newClient(t))
+
+	arr, err := p.GetList()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%+v", arr)
+}
+
+func TestPool_GetMemberV2(t *testing.T) {
+	p := New(newClient(t))
+
+	arr, err := p.GetMemberV2([]string{"/Common/boom-ac-29-vip_pool", "/Common/boom-ac-28-vip_pool"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%+v", arr)
+}
+
+func TestPool_GetMonitorAssociation(t *testing.T) {
+
+	p := New(newClient(t))
+
+	arr, err := p.GetMonitorAssociation([]string{"/Common/A1_UMSP-APP-BAT-NO_pool"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%+v", arr)
+}
+
+func TestPool_GetMemberRatio(t *testing.T) {
+
+	p := New(newClient(t))
+
+	arr, err := p.GetMemberRatio(
+		[]string{"/Common/boom-ac-29-vip_pool", "/Common/boom-ac-28-vip_pool"},
+		[][]global_lb.VirtualServerID{
+			{
+				{Name: "vs_76_147_241_195_3306", Server: "/Common/boom-ac-29-vip_76.147.241.195"},
+				{Name: "vs_76_147_241_196_3306", Server: "/Common/boom-ac-29-vip_76.147.241.196"},
+			},
+			{
+				{Name: "vs_76_147_225_195_3306", Server: "/Common/boom-ac-28-vip_76.147.225.195"},
+				{Name: "vs_76_147_232_195_3306", Server: "//Common/boom-ac-28-vip_76.147.232.195"},
+			},
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%+v", arr)
 }

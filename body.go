@@ -1,4 +1,4 @@
-package go_f5_soap
+package soap
 
 import "encoding/xml"
 
